@@ -1,9 +1,16 @@
+// TODO: save city name and coordinates to localStorage
+
+// add city name to header
+// add current date to header
+// add day(Monday) to forecast days
+
 // SELECT FORM ELEMS and Display Divs
-submit = $('main').children().eq(0);
-currentDiv = document.querySelector('main').children[1];
-forecastDiv = document.querySelector('main').children[2];
+submit = $('header').children().eq(1);
+currentDiv = document.querySelector('main').children[0];
+forecastDiv = document.querySelector('main').children[1];
 var lat = '';
 var long = '';
+let weekday = moment().format('dddd')
 
 submit.on('click', () => {
 
@@ -75,6 +82,7 @@ function display(day, type) {
     if (type === 'current') {
         let curr = document.createElement('section');
         currentDiv.appendChild(curr);
+        curr.setAttribute('class', 'col col-6 p-1 border border-3 border-success rounded-3');
         curr.appendChild(icon);
         addToDOM('span', 'Temperature: ' + domTemp, curr);
         addToDOM('span', 'Humidity: ' + domHumidity, curr);
@@ -82,6 +90,7 @@ function display(day, type) {
     } else {
         let fore = document.createElement('section');
         forecastDiv.appendChild(fore);
+        fore.setAttribute('class', 'col p-1 m-1 border border-3 border-success rounded-3');
         fore.appendChild(icon);
         addToDOM('span', 'Temperature: ' + domTemp, fore);
         addToDOM('span', 'Humidity: ' + domHumidity, fore);
@@ -114,8 +123,6 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&AP
     const obj = new day(description, temperature, humidity, wind);
 
     // display to dom
-    console.log(obj)
-    // for each property in day
     display(obj, 'current');
 
 });
