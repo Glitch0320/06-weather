@@ -1,5 +1,7 @@
 // SELECT FORM ELEMS and Display Divs
 submit = $('main').children().eq(0);
+currentDiv = document.querySelector('main').children[1];
+forecastDiv = document.querySelector('main').children[2];
 var lat = '';
 var long = '';
 
@@ -22,12 +24,11 @@ function getCoords() {
 function saveCoords(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
-    console.log(lat + ' ' + long)
     getData()
 }
 
 
-// days will be an array of objects that can be displayed to the screen.
+//  forecast will be an object containing day objects
 // Current weather data will consist of the most current/recent readings on page load
 // Days that are part of a five day forecast shall be averages of all of the available readings for that day
 
@@ -58,8 +59,36 @@ function findMost(arr) {
 function addToDOM(tag, content, appendTo){
     const elem = document.createElement(tag)
     elem.textContent = content
-    document.querySelector(appendTo).appendChild(elem)
+    appendTo.appendChild(elem)
   }
+
+function display(day, type) {
+
+    // description
+    icon = document.createElement('img')
+    icon.setAttribute('src', `http://openweathermap.org/img/wn/${day.description}@2x.png`)
+    // temp
+    domTemp = day.temperature;
+    domHumidity = day.humidity;
+    domWind = day.wind;
+
+    if (type === 'current') {
+        let curr = document.createElement('section');
+        currentDiv.appendChild(curr);
+        curr.appendChild(icon);
+        addToDOM('span', 'Temperature: ' + domTemp, curr);
+        addToDOM('span', 'Humidity: ' + domHumidity, curr);
+        addToDOM('span', 'Wind Speed: ' + domWind, curr);
+    } else {
+        let fore = document.createElement('section');
+        forecastDiv.appendChild(fore);
+        fore.appendChild(icon);
+        addToDOM('span', 'Temperature: ' + domTemp, fore);
+        addToDOM('span', 'Humidity: ' + domHumidity, fore);
+        addToDOM('span', 'Wind Speed: ' + domWind, fore);
+    }
+    
+}
 
 class day {
     constructor (description, temperature, humidity, wind) {
@@ -78,16 +107,16 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&AP
 .then( response => response.json() )
 .then( block => {
 
-    // date = September 
-    const initTime = moment.unix(block.dt).format('MMMM Do YYYY hh:mm:ss a');
-    const description = block.weather[0].main;
-    const temperature = block.main.temp;
+    const description = block.weather[0].icon;
+    const temperature = Math.round(block.main.temp);
     const humidity = block.main.humidity;
-    const wind = block.wind.speed;
-    const obj = new day(initTime, description, temperature, humidity, wind);
+    const wind = Math.round(block.wind.speed);
+    const obj = new day(description, temperature, humidity, wind);
 
     // display to dom
-
+    console.log(obj)
+    // for each property in day
+    display(obj, 'current');
 
 });
 
@@ -107,8 +136,8 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&A
     // this will start at index 271 for example
     currentDay = parseInt(today) + 1;
 
-    // For each day(multiple blocks) average all values for that day then add to days array
-    data.list.forEach( (increment, i) => {
+    // For each day(multiple blocks) average all values for that day then add to forecast array
+    data.list.forEach( (increment) => {
 
         incrementDay = parseInt(moment.unix(increment.dt).format('DDDD'))
 
@@ -118,7 +147,7 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&A
             // current day will = 270 until incrementday moves to 271, then currentday = 271
             if ( incrementDay === currentDay ) {
 
-                temp.descriptions.push(increment.weather[0].main);
+                temp.descriptions.push(increment.weather[0].icon);
                 temp.temperature += increment.main.temp;
                 temp.humidity += increment.main.humidity;
                 temp.wind += increment.wind.speed;
@@ -151,7 +180,11 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&A
     });
 
     // display to dom
-    console.log(forecast)
+    for (let i = 0; i < forecast.length; i++) {
+
+        display(forecast[i], 'forecast');
+
+    }
 
 });
 
