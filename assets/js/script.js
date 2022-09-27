@@ -1,12 +1,30 @@
 // SELECT FORM ELEMS and Display Divs
 submit = $('main').children().eq(0);
+var lat = '';
+var long = '';
 
 submit.on('click', () => {
 
-    var here = navigator.geolocation.getCurrentPosition();
-    console.log(here)
+    getCoords();
 
 });
+
+function getCoords() {
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(saveCoords);
+    } else {
+        alert('This browser doesn\'t support geolocation');
+    }
+
+} 
+
+function saveCoords(position) {
+    lat = position.coords.latitude;
+    long = position.coords.longitude;
+    console.log(lat + ' ' + long)
+    getData()
+}
 
 
 // days will be an array of objects that can be displayed to the screen.
@@ -52,9 +70,11 @@ class day {
     }
 }
 
+function getData() {
+
 // CURRENT DAY
 // weather? will be current weather
-fetch(`https://api.openweathermap.org/data/2.5/weather?q=Fairmont,mn,us&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
+fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
 .then( response => response.json() )
 .then( block => {
 
@@ -72,7 +92,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Fairmont,mn,us&APPID=3c
 });
 
 // FORECAST
-fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Fairmont,mn,us&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
+fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
 .then( response => response.json() )
 .then( data => {
 
@@ -130,6 +150,9 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Fairmont,mn,us&APPID=3
 
     });
 
+    // display to dom
     console.log(forecast)
 
 });
+
+}
