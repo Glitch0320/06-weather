@@ -1,3 +1,14 @@
+// SELECT FORM ELEMS and Display Divs
+submit = $('main').children().eq(0);
+
+submit.on('click', () => {
+
+    var here = navigator.geolocation.getCurrentPosition();
+    console.log(here)
+
+});
+
+
 // days will be an array of objects that can be displayed to the screen.
 // Current weather data will consist of the most current/recent readings on page load
 // Days that are part of a five day forecast shall be averages of all of the available readings for that day
@@ -24,6 +35,13 @@ function findMost(arr) {
     }
     return val;
 }
+
+// THANKS TO GARY
+function addToDOM(tag, content, appendTo){
+    const elem = document.createElement(tag)
+    elem.textContent = content
+    document.querySelector(appendTo).appendChild(elem)
+  }
 
 class day {
     constructor (description, temperature, humidity, wind) {
@@ -90,9 +108,9 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Fairmont,mn,us&APPID=3
 
                 // average the last day and add it to days, then add this increment to temp, then add one to currentday
                 description = findMost(temp.descriptions);
-                temperature = temp.temperature / avgIndex;
-                humidity = temp.humidity / avgIndex;
-                wind = temp.wind / avgIndex;
+                temperature = Math.round(temp.temperature / avgIndex);
+                humidity = Math.round(temp.humidity / avgIndex);
+                wind = Math.round(temp.wind / avgIndex);
                 let averageOfToday = new day(description, temperature, humidity, wind);
                 forecast.push(averageOfToday);
 
