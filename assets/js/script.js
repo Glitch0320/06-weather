@@ -1,23 +1,21 @@
 // TODO: save city name and coordinates to localStorage
-
+// add local storage to history
 // add city name to header
 // add current date to header
-// add day(Monday) to days
 
 // SELECT FORM ELEMS and Display Divs
-submit = $('header').children().eq(1);
+cityInput = $('header').children().eq(1)
+search = $('header').children().eq(2);
+submit = $('header').children().eq(3);
 currentDiv = document.querySelector('main').children[0];
 forecastDiv = document.querySelector('main').children[1];
 var lat = '';
 var long = '';
-let currentWeekday = moment().format('dddd')
-console.log(currentWeekday)
 
-submit.on('click', () => {
+// LOCAL STORAGE
+// TODO
 
-    getCoords();
-
-});
+// FUNCTIONS
 
 function getCoords() {
 
@@ -32,19 +30,12 @@ function getCoords() {
 function saveCoords(position) {
     lat = position.coords.latitude;
     long = position.coords.longitude;
-    getData()
+    currUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    foreUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    getData(currUrl, foreUrl)
 }
 
-
-//  forecast will be an object containing day objects
-// Current weather data will consist of the most current/recent readings on page load
-// Days that are part of a five day forecast shall be averages of all of the available readings for that day
-
-// API Weather is updated daily at 1, 4, 7, and 10 am, and 1, 4, 7, and 10pm
-
 const forecast = [];
-// 270
-const today = moment().format('DDDD');
 
 function findMost(arr) {
     // Return the item found most in an array, if tie, returns first
@@ -72,6 +63,9 @@ function addToDOM(tag, content, appendTo){
 
 function display(day, type) {
 
+    // date
+    domDay = day.date;
+    // console.log(domDay)
     // description
     icon = document.createElement('img')
     icon.setAttribute('src', `http://openweathermap.org/img/wn/${day.description}@2x.png`)
@@ -84,6 +78,7 @@ function display(day, type) {
         let curr = document.createElement('section');
         currentDiv.appendChild(curr);
         curr.setAttribute('class', 'col col-6 p-1 border border-3 border-success rounded-3');
+        addToDOM('span', 'Current Weather', curr);
         curr.appendChild(icon);
         addToDOM('span', 'Temperature: ' + domTemp, curr);
         addToDOM('span', 'Humidity: ' + domHumidity, curr);
@@ -92,6 +87,7 @@ function display(day, type) {
         let fore = document.createElement('section');
         forecastDiv.appendChild(fore);
         fore.setAttribute('class', 'col p-1 m-1 border border-3 border-success rounded-3');
+        addToDOM('span', domDay, fore)
         fore.appendChild(icon);
         addToDOM('span', 'Temperature: ' + domTemp, fore);
         addToDOM('span', 'Humidity: ' + domHumidity, fore);
@@ -101,7 +97,8 @@ function display(day, type) {
 }
 
 class day {
-    constructor (description, temperature, humidity, wind) {
+    constructor (date, description, temperature, humidity, wind) {
+        this.date = date;
         this.description = description;
         this.temperature = temperature;
         this.humidity = humidity;
@@ -109,19 +106,21 @@ class day {
     }
 }
 
-function getData() {
+function getData(currUrl, foreUrl) {
 
-// CURRENT DAY
-// weather? will be current weather
-fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
+// CURRENT Weather
+fetch(currUrl)
 .then( response => response.json() )
 .then( block => {
 
+    // add day(Wednesday) to days
+
+    const date = moment.unix(block.dt).format('dddd');
     const description = block.weather[0].icon;
     const temperature = Math.round(block.main.temp);
     const humidity = block.main.humidity;
     const wind = Math.round(block.wind.speed);
-    const obj = new day(description, temperature, humidity, wind);
+    const obj = new day(date, description, temperature, humidity, wind);
 
     // display to dom
     display(obj, 'current');
@@ -129,19 +128,27 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&AP
 });
 
 // FORECAST
-fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&APPID=3c4a8622d9bece109edad25f2ea3818a&units=imperial`)
+fetch(foreUrl)
 .then( response => response.json() )
 .then( data => {
+
+    // clear forecast
+    forecast.splice(0)
+
+    // TODO: Increment day every time
+    thisDate = moment()
+    thisDate.add(1, 'days')
 
     let avgIndex = 0;
     let temp = {
         descriptions: [],
         temperature: 0,
         humidity: 0,
-        wind: 0,
+        wind: 0
     }
 
     // this will start at index 271 for example
+    today = moment().format('DDDD')
     currentDay = parseInt(today) + 1;
 
     // For each day(multiple blocks) average all values for that day then add to forecast array
@@ -164,18 +171,20 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&A
             } else {
 
                 // average the last day and add it to days, then add this increment to temp, then add one to currentday
+                dayOfWeek = thisDate.format('dddd');
                 description = findMost(temp.descriptions);
                 temperature = Math.round(temp.temperature / avgIndex);
                 humidity = Math.round(temp.humidity / avgIndex);
                 wind = Math.round(temp.wind / avgIndex);
-                let averageOfToday = new day(description, temperature, humidity, wind);
+                let averageOfToday = new day(dayOfWeek, description, temperature, humidity, wind);
                 forecast.push(averageOfToday);
+                thisDate.add(1, 'days');
 
                 temp = {
                     descriptions: [],
                     temperature: 0,
                     humidity: 0,
-                    wind: 0,
+                    wind: 0
                 }
 
                 currentDay++;
@@ -197,3 +206,37 @@ fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&A
 });
 
 }
+
+// EVENT LISTENERS
+
+// Local Forecast
+submit.on('click', () => {
+
+    $('main').children().eq(0).text('')
+    $('main').children().eq(1).text('')
+    getCoords()
+
+});
+
+// Search City
+search.on('click', () => {
+
+    $('main').children().eq(0).text('')
+    $('main').children().eq(1).text('')
+
+    var city = cityInput.val();
+    console.log(cityInput.val())
+    if (!city) {
+        alert('Please enter city name.')
+        return;
+    }
+
+    // TODO: Add city to localStorage
+    
+
+    // search by city name
+    currUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    foreUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    getData(currUrl, foreUrl)
+
+});
