@@ -10,7 +10,8 @@ currentDiv = document.querySelector('main').children[0];
 forecastDiv = document.querySelector('main').children[1];
 var lat = '';
 var long = '';
-let weekday = moment().format('dddd')
+let weekday = moment().unix(1664321269).format('dddd')
+console.log(weekday)
 
 submit.on('click', () => {
 
