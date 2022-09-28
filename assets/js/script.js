@@ -1,10 +1,8 @@
-// TODO: save city name and coordinates to localStorage
-// add local storage to history
-// add city name to header
 // add current date to header
 
 // SELECT FORM ELEMS and Display Divs
-cityInput = $('header').children().eq(1)
+cityInput = $('header').children().eq(1);
+historyResults = $('header').children().eq(4);
 search = $('header').children().eq(2);
 submit = $('header').children().eq(3);
 currentDiv = document.querySelector('main').children[0];
@@ -13,7 +11,16 @@ var lat = '';
 var long = '';
 
 // LOCAL STORAGE
-// TODO
+let history = localStorage.getItem('history');
+history = history ? JSON.parse(history) : [];
+
+// show history
+history.forEach( city => {
+
+
+    addToDOM('button', city, historyResults);
+
+});
 
 // FUNCTIONS
 
@@ -56,25 +63,31 @@ function findMost(arr) {
 
 // THANKS TO GARY
 function addToDOM(tag, content, appendTo){
-    const elem = document.createElement(tag)
-    elem.textContent = content
-    appendTo.appendChild(elem)
+    
+    if (tag === 'button') {
+        appendTo.append(`<button class="hstry" type="button">${content}</button>`)
+    } else {
+        const elem = document.createElement(tag)
+        elem.textContent = content
+        appendTo.appendChild(elem)
+    }
+
   }
 
 function display(day, type) {
 
     // date
     domDay = day.date;
-    // console.log(domDay)
     // description
     icon = document.createElement('img')
     icon.setAttribute('src', `http://openweathermap.org/img/wn/${day.description}@2x.png`)
-    // temp
+    // stats
     domTemp = day.temperature;
     domHumidity = day.humidity;
     domWind = day.wind;
 
     if (type === 'current') {
+        addToDOM('h3', moment().format('dddd, MMMM Do, YYYY'), currentDiv);
         let curr = document.createElement('section');
         currentDiv.appendChild(curr);
         curr.setAttribute('class', 'col col-6 p-1 border border-3 border-success rounded-3');
@@ -113,7 +126,7 @@ fetch(currUrl)
 .then( response => response.json() )
 .then( block => {
 
-    // add day(Wednesday) to days
+    addToDOM('h2', block.name, currentDiv);
 
     const date = moment.unix(block.dt).format('dddd');
     const description = block.weather[0].icon;
@@ -232,9 +245,23 @@ search.on('click', () => {
     }
 
     // TODO: Add city to localStorage
-    
+    history.push(city)
+    localStorage.setItem('history', JSON.stringify(history))
 
     // search by city name
+    currUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    foreUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
+    getData(currUrl, foreUrl)
+
+});
+
+$('.hstry').on('click', (e) => {
+
+    $('main').children().eq(0).text('')
+    $('main').children().eq(1).text('')
+
+    // Call getData with current city name
+    city = e.target.innerHTML;
     currUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
     foreUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
     getData(currUrl, foreUrl)
