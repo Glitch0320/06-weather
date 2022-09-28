@@ -17,7 +17,6 @@ history = history ? JSON.parse(history) : [];
 // show history
 history.forEach( city => {
 
-
     addToDOM('button', city, historyResults);
 
 });
@@ -65,7 +64,7 @@ function findMost(arr) {
 function addToDOM(tag, content, appendTo){
     
     if (tag === 'button') {
-        appendTo.append(`<button class="hstry m-1" type="button">${content}</button>`)
+        appendTo.append(`<button class="hstry m-1" type="button">${content.toUpperCase()}</button>`)
     } else {
         const elem = document.createElement(tag)
         elem.textContent = content
@@ -247,6 +246,14 @@ search.on('click', () => {
     // TODO: Add city to localStorage
     history.push(city)
     localStorage.setItem('history', JSON.stringify(history))
+
+    // Show History
+    historyResults.text('')
+    history.forEach( city => {
+
+        addToDOM('button', city, historyResults);
+    
+    });
 
     // search by city name
     currUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
