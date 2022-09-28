@@ -2,6 +2,23 @@ span {
     display: block;
 }
 
+body {
+    background-color:bisque;
+}
+
+button {
+    background-color: darkslateblue;
+    color: aliceblue;
+}
+
+button:hover {
+    background-color: rgb(43, 36, 87);
+}
+
 section {
     background-color: dodgerblue;
+}
+
+section:hover {
+    background-color: rgb(12, 111, 210);
 }

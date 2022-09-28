@@ -2,7 +2,7 @@
 
 // SELECT FORM ELEMS and Display Divs
 cityInput = $('header').children().eq(1);
-historyResults = $('header').children().eq(4);
+historyResults = $('header').children().eq(5);
 search = $('header').children().eq(2);
 submit = $('header').children().eq(3);
 currentDiv = document.querySelector('main').children[0];
@@ -65,7 +65,7 @@ function findMost(arr) {
 function addToDOM(tag, content, appendTo){
     
     if (tag === 'button') {
-        appendTo.append(`<button class="hstry" type="button">${content}</button>`)
+        appendTo.append(`<button class="hstry m-1" type="button">${content}</button>`)
     } else {
         const elem = document.createElement(tag)
         elem.textContent = content
@@ -265,5 +265,14 @@ $('.hstry').on('click', (e) => {
     currUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
     foreUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&limit=5&appid=3c4a8622d9bece109edad25f2ea3818a&units=imperial`;
     getData(currUrl, foreUrl)
+
+});
+
+$('header').children().eq(6).on('click', () => {
+
+    // Clear History
+    history = [];
+    localStorage.setItem('history', history);
+    historyResults.text('');
 
 });
